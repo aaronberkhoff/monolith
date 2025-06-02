@@ -10,6 +10,7 @@ import torch
 ECI = "J2000"
 ECEF = "ITRF93"
 
+
 class State:
     """
     Object that stores state information:
@@ -32,10 +33,9 @@ class State:
 
     """
 
-    _supported_attributes = ['position', 'velocity', 'acceleration', 'time','lat']
+    _supported_attributes = ["position", "velocity", "acceleration", "time", "lat"]
 
-    def __init__(self, frame = "inertial",metadata = {},**kwargs):
-
+    def __init__(self, frame="inertial", metadata={}, **kwargs):
         """
         Constructs all the necessary attributes for the State object.
         """
@@ -43,21 +43,9 @@ class State:
 
             if key in State._supported_attributes:
 
-                if isinstance(value,(Iterable,float,int)):
-                    value =  torch.tensor(value).view(3,1)
+                if isinstance(value, (Iterable, float, int)):
+                    value = torch.tensor(value).view(3, 1)
 
                 setattr(self, key, value)
             else:
                 raise ValueError(f"kwarg <{key}> is not supported")
-
-            
-    
-
-
-
-
-
-
-
-
-        
