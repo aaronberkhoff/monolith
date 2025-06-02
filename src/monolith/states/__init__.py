@@ -35,7 +35,7 @@ class State:
 
     _supported_attributes = ["position", "velocity", "acceleration", "time", "lat"]
 
-    def __init__(self, frame="inertial", metadata={}, **kwargs):
+    def __init__(self, frame="inertial", **kwargs):
         """
         Constructs all the necessary attributes for the State object.
         """
@@ -49,3 +49,19 @@ class State:
                 setattr(self, key, value)
             else:
                 raise ValueError(f"kwarg <{key}> is not supported")
+
+        self.frame = frame
+
+    def place_holder(self, x):
+        """
+        Placeholder
+        """
+
+        return True, x
+
+    def place_holder2(self, x):
+        """
+        Place holder
+        """
+
+        return True, x
