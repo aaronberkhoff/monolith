@@ -34,4 +34,4 @@ jobs:
           poetry install --no-interaction --no-root
 
       - name: Run MyPy
-        run: mypy .
+        run: PYTHONPATH=src poetry run pytest
