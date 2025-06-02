@@ -1,14 +1,11 @@
 """
-State object definition and useful functions
+Author: Aaron Berkhoff:
 
 """
 
-from collections.abc import Iterable
-
+from typing import Optional
+from datetime import datetime
 import torch
-
-ECI = "J2000"
-ECEF = "ITRF93"
 
 
 class State:
@@ -30,38 +27,91 @@ class State:
         frame: str, optional:
             The reference frame of the state ('inertial' or 'ECEF', default is 'inertial').
         orbital_elements: monolith.orbital_elements, optional
-
     """
 
-    _supported_attributes = ["position", "velocity", "acceleration", "time", "lat"]
+    position: Optional[torch.Tensor]
+    velocity: Optional[torch.Tensor]
+    acceleration: Optional[torch.Tensor]
+    attitude: Optional[torch.Tensor]
+    angular_velocity: Optional[torch.Tensor]
+    angular_acceleration: Optional[torch.Tensor]
+    latitude: Optional[torch.Tensor]
+    longitude: Optional[torch.Tensor]
+    altitude: Optional[torch.Tensor]
+    time: Optional[datetime]
+    orbital_elements: Optional[object]  # Replace with actual type if you have it
+
+    _supported_attributes = [
+        "position",
+        "velocity",
+        "acceleration",
+        "attitude",
+        "angular_velocity",
+        "angular_acceleration",
+        "latitude",
+        "longitude",
+        "altitude",
+        "time",
+        "orbital_elements",
+    ]
 
     def __init__(self, frame="inertial", **kwargs):
-        """
-        Constructs all the necessary attributes for the State object.
-        """
+
+        # Initialize all known attributes to None
+        for attr in self._supported_attributes:
+            setattr(self, attr, None)
+
+        # Set attributes passed via kwargs
         for key, value in kwargs.items():
-
             if key in State._supported_attributes:
-
-                if isinstance(value, (Iterable, float, int)):
-                    value = torch.tensor(value).view(3, 1)
-
+                if isinstance(value, (list, tuple, float, int)):
+                    value = torch.tensor(value).view(-1, 1)
                 setattr(self, key, value)
             else:
                 raise ValueError(f"kwarg <{key}> is not supported")
 
         self.frame = frame
 
-    def place_holder(self, x):
+    def get_full_state(self) -> torch.Tensor:
         """
-        Placeholder
+        Concatenates all available tensor attributes in the documented order
+        into a single (N, 1) torch tensor.
+
+        Order:
+            position, velocity, acceleration, attitude,
+            angular_velocity, angular_acceleration,
+            latitude, longitude, altitude
+
+        Returns:
+            torch.Tensor: Concatenated state vector.
         """
+        ordered_attrs = [
+            "position",
+            "velocity",
+            "acceleration",
+            "attitude",
+            "angular_velocity",
+            "angular_acceleration",
+            "latitude",
+            "longitude",
+            "altitude",
+        ]
 
-        return True, x
+        tensors = []
 
-    def place_holder2(self, x):
+        for attr in ordered_attrs:
+            value = getattr(self, attr, None)
+            if isinstance(value, torch.Tensor):
+                tensors.append(value)
+
+        if tensors:
+            return torch.cat(tensors, dim=0)
+
+        raise ValueError("No tensor attributes are set on the State object.")
+
+    def placeholder(self, x):
         """
         Place holder
         """
 
-        return True, x
+        return False, x
