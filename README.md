@@ -12,5 +12,6 @@ Stop Container
 - `docker image prune -a`
 - `docker volume prune`
 - `docker network prune`
+- `act push -s PYPI_API_TOKEN=yourtoken`
 
 - TODO: Set up docker image for faster CI/CD

@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "monolith"
-version = "0.1.0"
-description = "Monolith package with C++ extensions"
+name = "monolith-space"
+version = "0.1.1"
+description = "Orbital Mechanics library"
 authors = ["Aaron Berkhoff <aaronberkhoff@outlook.com>"]
 packages = [{include = "monolith", from = "python"}]
 include = [
-    {path = "python/monolith/dynamics*.so", format = "wheel"},
-    {path = "python/monolith/planets*.so", format = "wheel"},
+    {path = "python/monolith/*.so", format = "wheel"},
+    {path = "python/monolith/*.pyi", format = "wheel"},
 
 ]
 

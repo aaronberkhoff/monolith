@@ -1,4 +1,4 @@
-name: Build Package
+name: Build & Publish Package
 
 on:
   # push:
@@ -52,6 +52,12 @@ jobs:
       # 7. Build the Python package (includes compiled extensions)
       - name: Build package with Poetry
         run: poetry build
+
+      # 5. Publish to PyPI
+      - name: Publish to PyPI
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
+        run: poetry publish --no-interaction --username __token__ --password $POETRY_PYPI_TOKEN_PYPI
 
       # 9. Upload the built package artifact
       # - name: Upload package artifact
