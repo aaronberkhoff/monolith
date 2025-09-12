@@ -28,7 +28,7 @@ Eigen::Vector3d State::get_acceleration() const{
 
 // ----------------Two Body-------------------------
 
-State TwoBody::func(const State& state) const {
+State TwoBody::operator()(const State& state) const {
     State new_state = state;  // start with a copy
 
     double r_norm = state.position.norm();
