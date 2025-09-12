@@ -1,20 +1,21 @@
-[project]
+[tool.poetry]
 name = "monolith"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "aaronberkhoff",email = "aaronberkhoff@outlook.com"}
-]
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "numpy (>=2.2.6,<3.0.0)",
-    "mypy (>=1.16.0,<2.0.0)"
-]
-
-[tool.poetry]
+description = "Monolith package with C++ extensions"
+authors = ["Aaron Berkhoff <aaronberkhoff@outlook.com>"]
 packages = [{include = "monolith", from = "python"}]
+include = [
+    {path = "python/monolith/dynamics*.so", format = "wheel"},
+    {path = "python/monolith/planets*.so", format = "wheel"},
 
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+numpy = ">=2.2.6,<3.0.0"
+pybind11 = "^2.11.0"
+mypy = ">=1.16.0,<2.0.0"
+pybind11-stubgen = "^2.5.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.0"
@@ -22,6 +23,27 @@ mypy = "^1.16.0"
 pylint = "^3.3.7"
 black = "^25.1.0"
 pre-commit = "^4.2.0"
+poetry = "^1.7.0"
+pybind11-stubgen = "^2.5.5"
+
+[tool.poetry.extras]
+dev = [
+    "pytest",
+    "mypy",
+    "pylint",
+    "black",
+    "pre-commit",
+    "poetry",
+    "pybind11",
+    "pybind11-stubgen",
+]
+
+# Include compiled C++ extensions
+# [[tool.poetry.include]]
+# path = "python/monolith/dynamics*.so"
+
+# [[tool.poetry.include]]
+# path = "python/monolith/planets*.so"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

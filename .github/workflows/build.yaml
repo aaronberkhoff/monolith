@@ -1,36 +1,61 @@
 name: Build Package
 
 on:
+  # push:
+    # tags:
+      # - 'v*'  # Runs on version tags like "v1.0.0"
   push:
-    tags:
-      - 'v*'  # Runs when a version tag like "v1.0.0" is pushed.
+    branches: [ core/ci-cd-pipeline-setup ]
+  pull_request:
+    branches: [ core/ci-cd-pipeline-setup ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      MonoHome: ${{ github.workspace }}
+
     steps:
+      # 1. Checkout code
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      # 2. Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
 
+      # 3. Install Poetry
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           echo "${HOME}/.local/bin" >> $GITHUB_PATH
 
-      - name: Install dependencies
+      # 4. Install system dependencies for C++ extensions
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ make cmake python3-dev libeigen3-dev
+
+      # 5. Install Python dependencies via Poetry
+      - name: Install Python dependencies
         run: poetry install --no-interaction --no-root
 
-      - name: Build package
+      - name: Install package in editable mode
+        run: poetry run pip install -e .
+      # 6. Build C++ extensions using Makefile
+      - name: Build C++ extensions
+        run: poetry run make all
+
+      # 7. Build the Python package (includes compiled extensions)
+      - name: Build package with Poetry
         run: poetry build
 
-      - name: Upload package artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: built-package
-          path: dist/*
+      # 9. Upload the built package artifact
+      # - name: Upload package artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: built-package
+      #     path: dist/*

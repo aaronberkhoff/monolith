@@ -3,11 +3,11 @@
 
 class State {
 public:
-    Eigen::Vector3d position;
-    Eigen::Vector3d velocity;
-    Eigen::Vector3d acceleration;
+    Eigen::Vector3d position = Eigen::Vector3d::Zero();
+    Eigen::Vector3d velocity = Eigen::Vector3d::Zero();
+    Eigen::Vector3d acceleration = Eigen::Vector3d::Zero();
 
-    virtual ~State() = default;
+    // virtual ~State() = default;
 
     // this is how you can do default arguments
     State()
