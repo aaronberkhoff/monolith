@@ -1,6 +1,6 @@
 import torch
 
-from monolith.dynamics import Dynamic
+from monolith.dynamics_dep import Dynamic
 
 
 class TwoBody(Dynamic):
