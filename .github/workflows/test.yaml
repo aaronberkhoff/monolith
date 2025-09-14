@@ -25,7 +25,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y lcov make cmake python3-dev libeigen3-dev
+          sudo apt-get install -y g++ lcov make cmake python3-dev libeigen3-dev unzip curl
 
       - name: Install Poetry
         run: pip install poetry
@@ -36,9 +36,17 @@ jobs:
       - name: Install package in editable mode
         run: poetry run pip install -e .
 
-      # --- Build C++ extension with coverage flags ---
+      # --- Install SonarCloud build-wrapper ---
+      - name: Install SonarCloud build-wrapper
+        run: |
+          curl -sSLo build-wrapper-linux-x86.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+          unzip build-wrapper-linux-x86.zip
+          sudo mv build-wrapper-linux-x86/* /usr/local/bin/
+
+      # --- Build C++ extension with coverage + build-wrapper ---
       - name: Build C++ extensions
-        run: poetry run make cov
+        run: |
+          build-wrapper-linux-x86-64 --out-dir build_wrapper_output make cov
 
       - name: Build package
         run: poetry build
@@ -52,8 +60,8 @@ jobs:
         run: |
           # Capture coverage from build dir
           lcov --capture --directory cpp/obj/src --output-file coverage.info
-          # Filter out system files
-          lcov --remove coverage.info
+          # Filter out system files, site-packages, and bindings
+          lcov --remove coverage.info '/usr/*' '*/site-packages/*' '*/bindings/*' --output-file coverage.info
           # Generate HTML report
           genhtml coverage.info --output-directory cpp_coverage
 
@@ -75,3 +83,10 @@ jobs:
         with:
           name: cpp-coverage-data
           path: coverage.info
+
+      # --- SonarCloud Analysis ---
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # Provided by GitHub
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}  # Created in SonarCloud
