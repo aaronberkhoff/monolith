@@ -2,8 +2,10 @@ name: Run Tests with Coverage
 
 on:
   push:
-    branches: [ main ]
+    branches: [ core/ci-cd-pipeline-setup, main ]
   pull_request:
+    branches: [ core/ci-cd-pipeline-setup, main ]
+  # Publish on version tag push (e.g., v1.0.0)
 
 jobs:
   test:
