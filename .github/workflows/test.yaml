@@ -25,7 +25,10 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++ lcov make cmake python3-dev libeigen3-dev unzip curl
+          sudo apt-get install -y lcov make cmake python3-dev libeigen3-dev
+          curl -sSLo build-wrapper-linux-x86.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+          unzip build-wrapper-linux-x86.zip
+          sudo mv build-wrapper-linux-x86/* /usr/local/bin/
 
       - name: Install Poetry
         run: pip install poetry
@@ -36,17 +39,9 @@ jobs:
       - name: Install package in editable mode
         run: poetry run pip install -e .
 
-      # --- Install SonarCloud build-wrapper ---
-      - name: Install SonarCloud build-wrapper
-        run: |
-          curl -sSLo build-wrapper-linux-x86.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
-          unzip build-wrapper-linux-x86.zip
-          sudo mv build-wrapper-linux-x86/* /usr/local/bin/
-
-      # --- Build C++ extension with coverage + build-wrapper ---
+      # --- Build C++ extension with coverage flags ---
       - name: Build C++ extensions
-        run: |
-          build-wrapper-linux-x86-64 --out-dir build_wrapper_output make cov
+        run: poetry run build-wrapper-linux-x86-64 --out-dir build_wrapper_output make cov
 
       - name: Build package
         run: poetry build
@@ -60,8 +55,8 @@ jobs:
         run: |
           # Capture coverage from build dir
           lcov --capture --directory cpp/obj/src --output-file coverage.info
-          # Filter out system files, site-packages, and bindings
-          lcov --remove coverage.info '/usr/*' '*/site-packages/*' '*/bindings/*' --output-file coverage.info
+          # Filter out system files
+          lcov --remove coverage.info
           # Generate HTML report
           genhtml coverage.info --output-directory cpp_coverage
 
@@ -88,5 +83,5 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # Provided by GitHub
-          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}  # Created in SonarCloud
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # GitHub automatically provides this
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}  # You added this in step 2
