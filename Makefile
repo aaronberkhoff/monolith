@@ -1,9 +1,12 @@
 # Compiler
-CXX = g++
+CXX ?= g++-11
 
 # Compilation flags
 CXXFLAGS = -O3 -Wall -std=c++23 -fPIC
 CXXFLAGS += -Wno-maybe-uninitialized # suppress pybind11 warning
+
+CXXFLAGS_COV = -O0 -g -fprofile-arcs -ftest-coverage -fPIC # for coverage analysis
+CXXFLAGS_COV += -Wno-maybe-uninitialized # suppress pybind11 warning
 
 # Include paths
 INCLUDES = -I$(MonoHome)/cpp/include \
@@ -31,24 +34,32 @@ DYNAMICS_OBJ = $(patsubst $(CPP_FOLDER)/%.cpp,$(CPP_FOLDER)/obj/%.o,$(DYNAMICS_S
 PLANETS_OBJ  = $(patsubst $(CPP_FOLDER)/%.cpp,$(CPP_FOLDER)/obj/%.o,$(PLANETS_SRC))
 
 # ---------------- Build rules ----------------
+# ---------------- Build rules ----------------
+
+.PHONY: all cov clean stubs
+
+all: CXXFLAGS := $(CXXFLAGS)
 all: $(DYNAMICS_SO) $(PLANETS_SO) stubs
 
-# Compile .cpp -> .o in CPP_FOLDER/obj/
+cov: CXXFLAGS := $(CXXFLAGS_COV)
+cov: LDFLAGS += -fprofile-arcs -ftest-coverage
+cov: $(DYNAMICS_SO) $(PLANETS_SO) stubs
+
+# Compile .cpp -> .o
 $(CPP_FOLDER)/obj/%.o: $(CPP_FOLDER)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-
-# Build shared libraries directly in Python package
+# Build shared libraries
 $(DYNAMICS_SO): $(DYNAMICS_OBJ)
 	@mkdir -p $(PY_FOLDER)
-	$(CXX) $(CXXFLAGS) -shared $^ -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $^ -o $@
 
 $(PLANETS_SO): $(PLANETS_OBJ)
 	@mkdir -p $(PY_FOLDER)
-	$(CXX) $(CXXFLAGS) -shared $^ -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared $^ -o $@
 
-# Conditional stub generation
+# Stub generation
 stubs: $(PY_FOLDER)/dynamics.pyi $(PY_FOLDER)/planets.pyi
 
 $(PY_FOLDER)/dynamics.pyi: $(DYNAMICS_SO)

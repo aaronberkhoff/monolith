@@ -1,0 +1,75 @@
+name: Run Tests with Coverage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      MonoHome: ${{ github.workspace }}
+
+    steps:
+      # --- Setup ---
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lcov make cmake python3-dev libeigen3-dev
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --with dev --no-interaction --no-root
+
+      - name: Install package in editable mode
+        run: poetry run pip install -e .
+
+      # --- Build C++ extension with coverage flags ---
+      - name: Build C++ extensions
+        run: poetry run make cov
+
+      - name: Build package
+        run: poetry build
+
+      # --- Run tests (Python + C++) ---
+      - name: Run pytest with coverage
+        run: |
+          poetry run pytest --cov=mypackage --cov-report=xml --cov-report=term-missing
+
+      - name: Generate lcov report
+        run: |
+          # Capture coverage from build dir
+          lcov --capture --directory cpp/obj/src --output-file coverage.info
+          # Filter out system files
+          lcov --remove coverage.info
+          # Generate HTML report
+          genhtml coverage.info --output-directory cpp_coverage
+
+      # --- Upload artifacts ---
+      - name: Upload Python coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-coverage
+          path: coverage.xml
+
+      - name: Upload C++ coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-coverage
+          path: cpp_coverage
+
+      - name: Upload C++ coverage data
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-coverage-data
+          path: coverage.info
