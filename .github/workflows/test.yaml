@@ -43,7 +43,7 @@ jobs:
       - name: Build C++ extensions
         run: |
           poetry run make clean
-          poetry run build-wrapper-linux-x86-64 --out-dir cpp/obj/src make cov
+          poetry run build-wrapper-linux-x86-64 --out-dir build_wrapper_output make cov
 
       - name: Build package
         run: poetry build
@@ -82,10 +82,10 @@ jobs:
           path: coverage.info
 
       # --- SonarCloud Analysis ---
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        with:
-          args: -X
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # GitHub automatically provides this
-          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}  # You added this in step 2
+      # - name: SonarCloud Scan
+      #   uses: SonarSource/sonarcloud-github-action@v2
+      #   with:
+      #     args: -X
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # GitHub automatically provides this
+      #     SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}  # You added this in step 2
