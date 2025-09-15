@@ -1,31 +1,91 @@
-name: Test Package
+name: Run Tests with Coverage
 
 on:
   push:
-    branches:
-      - dev  # Change to your default branch
+    branches: [dev]
   pull_request:
+    branches: [dev]
+  # Publish on version tag push (e.g., v1.0.0)
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      MonoHome: ${{ github.workspace }}
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
+      # --- Setup ---
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Install Poetry
+      - name: Install system dependencies
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "${HOME}/.local/bin" >> $GITHUB_PATH
+          sudo apt-get update
+          sudo apt-get install -y lcov make cmake python3-dev libeigen3-dev
+          curl -sSLo build-wrapper-linux-x86.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+          unzip build-wrapper-linux-x86.zip
+          sudo mv build-wrapper-linux-x86/* /usr/local/bin/
+
+      - name: Install Poetry
+        run: pip install poetry
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root
+        run: poetry install --with dev --no-interaction --no-root
 
-      - name: Run tests
-        run: PYTHONPATH=src poetry run pytest
+      - name: Install package in editable mode
+        run: poetry run pip install -e .
+
+      # --- Build C++ extension with coverage flags ---
+      - name: Build C++ extensions
+        run: |
+          poetry run make clean
+          poetry run build-wrapper-linux-x86-64 --out-dir build_wrapper_output make cov
+
+      - name: Build package
+        run: poetry build
+
+      # --- Run tests (Python + C++) ---
+      - name: Run pytest with coverage
+        run: |
+          poetry run pytest --cov=mypackage --cov-report=xml --cov-report=term-missing
+
+      - name: Generate lcov report
+        run: |
+          # Capture coverage from build dir
+          lcov --capture --directory cpp/obj/src --output-file coverage.info
+          # Filter out system files
+          lcov --remove coverage.info
+          # Generate HTML report
+          genhtml coverage.info --output-directory cpp_coverage
+
+      # --- Upload artifacts ---
+      - name: Upload Python coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-coverage
+          path: coverage.xml
+
+      - name: Upload C++ coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-coverage
+          path: cpp_coverage
+
+      - name: Upload C++ coverage data
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-coverage-data
+          path: coverage.info
+
+      # --- SonarCloud Analysis ---
+      # - name: SonarCloud Scan
+      #   uses: SonarSource/sonarcloud-github-action@v2
+      #   with:
+      #     args: -X
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # GitHub automatically provides this
+      #     SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}  # You added this in step 2

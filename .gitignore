@@ -4,6 +4,10 @@ __pycache__/
 *$py.class
 *.pyi
 
+#misc
+.test_venv/
+bin/
+temp/
 
 # C extensions
 *.so
