@@ -41,7 +41,9 @@ jobs:
 
       # --- Build C++ extension with coverage flags ---
       - name: Build C++ extensions
-        run: poetry run build-wrapper-linux-x86-64 --out-dir build_wrapper_output make cov
+        run: |
+          poetry run make clean
+          poetry run build-wrapper-linux-x86-64 --out-dir build_wrapper_output make cov
 
       - name: Build package
         run: poetry build

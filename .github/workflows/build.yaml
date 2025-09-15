@@ -40,7 +40,9 @@ jobs:
         run: poetry run pip install -e .
 
       - name: Build C++ extensions
-        run: poetry run make all
+        run: |
+          poetry run make clean
+          poetry run make all
 
       - name: Build package
         run: poetry build
