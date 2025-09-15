@@ -43,7 +43,7 @@ jobs:
       - name: Build C++ extensions
         run: |
           poetry run make clean
-          poetry run build-wrapper-linux-x86-64 --out-dir build_wrapper_output make cov
+          poetry run build-wrapper-linux-x86-64 --out-dir cpp/obj/src make cov
 
       - name: Build package
         run: poetry build
