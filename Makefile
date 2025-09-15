@@ -41,6 +41,7 @@ PLANETS_OBJ  = $(patsubst $(CPP_FOLDER)/%.cpp,$(CPP_FOLDER)/obj/%.o,$(PLANETS_SR
 all: CXXFLAGS := $(CXXFLAGS)
 all: $(DYNAMICS_SO) $(PLANETS_SO) stubs
 
+cov: clean
 cov: CXXFLAGS := $(CXXFLAGS_COV)
 cov: LDFLAGS += -fprofile-arcs -ftest-coverage
 cov: $(DYNAMICS_SO) $(PLANETS_SO) stubs
