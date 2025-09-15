@@ -3,9 +3,9 @@ name: Build & Publish Package
 on:
   # Build on branch pushes and PRs
   push:
-    branches: [ core/ci-cd-pipeline-setup, main ]
+    branches: [dev]
   pull_request:
-    branches: [ core/ci-cd-pipeline-setup, main ]
+    branches: [dev]
   # Publish on version tag push (e.g., v1.0.0)
   release:
     types: [published]
