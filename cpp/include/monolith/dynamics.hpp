@@ -1,5 +1,6 @@
 #pragma once
 #include <Eigen/Dense>
+#include "planets.hpp"
 
 class State {
 public:
@@ -56,4 +57,56 @@ public:
     explicit TwoBody(double mu_) : mu(mu_) {} // Initializer
     State operator()(const State& state) const override; // base function
     double mu;
+};
+
+// TODO: consider making planet a shared pointer
+
+class J2 : public Dynamic {
+public:
+
+    explicit J2(const Planet& central_body) : central_body(central_body) {}
+
+    State operator()(const State& state) const override; // base function
+
+    Planet central_body;
+};
+
+class J3 : public Dynamic {
+public:
+
+    explicit J3(const Planet& central_body) : central_body(central_body) {}
+
+    State operator()(const State& state) const override; // base function
+
+    Planet central_body;
+};
+
+class J4 : public Dynamic {
+public:
+
+    explicit J4(const Planet& central_body) : central_body(central_body) {}
+
+    State operator()(const State& state) const override; // base function
+
+    Planet central_body;
+};
+
+class J5 : public Dynamic {
+public:
+
+    explicit J5(const Planet& central_body) : central_body(central_body) {}
+
+    State operator()(const State& state) const override; // base function
+
+    Planet central_body;
+};
+
+class J6 : public Dynamic {
+public:
+
+    explicit J6(const Planet& central_body) : central_body(central_body) {}
+
+    State operator()(const State& state) const override; // base function
+
+    Planet central_body;
 };

@@ -15,3 +15,5 @@ Stop Container
 - `act push -s PYPI_API_TOKEN=yourtoken`
 
 - TODO: Set up docker image for faster CI/CD
+
+- Left off with bindings
