@@ -2,12 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.pyi
 
 #misc
 .test_venv/
 bin/
 temp/
+.sonarlint
 
 # C extensions
 *.so

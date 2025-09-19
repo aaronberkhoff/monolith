@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
 
-class Planet {
+namespace monolith {
+class CelestialBody {
 public:
     std::string name;
     double mu;
@@ -10,9 +11,9 @@ public:
     double j3;
     int spice_id;
 
-    Planet() = default;
+    CelestialBody() = default;
 
-    Planet(const std::string& name_,
+    CelestialBody(const std::string& name_,
            double mu_,
            double radius_,
            double j2_,
@@ -21,14 +22,14 @@ public:
         : name(name_), mu(mu_), radius(radius_),
           j2(j2_), j3(j3_), spice_id(spice_id_) {}
 
-    virtual ~Planet() = default;
+    virtual ~CelestialBody() = default;
 };
 
 // ---------------- Earth ----------------
-class Earth : public Planet {
+class Earth : public CelestialBody {
 public:
     Earth()
-        : Planet("Earth",
+        : CelestialBody("Earth",
                  398600.4415,  // km^3/s^2
                  6378.1363,    // km
                  0.0010826267,
@@ -37,13 +38,14 @@ public:
 };
 
 // ---------------- Moon ----------------
-class Moon : public Planet {
+class Moon : public CelestialBody {
 public:
     Moon()
-        : Planet("Moon",
+        : CelestialBody("Moon",
                  4902.800066,  // km^3/s^2
                  1737.4,       // km
                  0.0002027,
                  0.0,
                  301) {}
 };
+} // namespace monolith::CelestialBodys
