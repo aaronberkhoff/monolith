@@ -53,4 +53,20 @@ inline void bind_dynamics(py::module_ &m) {
         .def(py::init<const CelestialBody&>(), py::arg("central_body"))
         .def("__call__", &J3::operator())
         .def_readwrite("central_body", &J3::central_body);
+
+    // -------------------- Bind J4 --------------------
+    py::class_<J4, Dynamic, std::shared_ptr<J4>>(m, "J4")
+        .def(py::init<const CelestialBody&>(), py::arg("central_body"))
+        .def("__call__", &J4::operator())
+        .def_readwrite("central_body", &J4::central_body);
+    // -------------------- Bind J5 --------------------
+    py::class_<J5, Dynamic, std::shared_ptr<J5>>(m, "J5")
+        .def(py::init<const CelestialBody&>(), py::arg("central_body"))
+        .def("__call__", &J5::operator())
+        .def_readwrite("central_body", &J5::central_body);
+    // -------------------- Bind J6 --------------------
+    py::class_<J6, Dynamic, std::shared_ptr<J6>>(m, "J6")
+        .def(py::init<const CelestialBody&>(), py::arg("central_body"))
+        .def("__call__", &J6::operator())
+        .def_readwrite("central_body", &J6::central_body);
 }

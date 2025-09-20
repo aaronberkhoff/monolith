@@ -94,17 +94,25 @@ CPP_FOLDER = $(MonoHome)/cpp
 
 BUILD_DIR := build
 
-.PHONY: all clean stubs stubs_clean
+.PHONY: all clean stubs stubs_clean cov
 
 all:
 	@mkdir -p $(BUILD_DIR)
 	cd $(BUILD_DIR) && cmake .. -DCMAKE_BUILD_TYPE=Release -D pybind11_DIR=$(python3 -m pybind11 --cmakedir)
 	cmake --build $(BUILD_DIR) --target all -j$(nproc)
 
-# stubs:
+# cov:
 # 	@mkdir -p $(BUILD_DIR)
-# 	cd $(BUILD_DIR) && cmake .. -DCMAKE_BUILD_TYPE=Release -D pybind11_DIR=$(python3 -m pybind11 --cmakedir)
-# 	cmake --build $(BUILD_DIR) --target stubs -j$(nproc)
+# 	cd $(BUILD_DIR) && cmake .. \
+# 		-DCOVERAGE=ON \
+# 		-DCMAKE_BUILD_TYPE=Debug \
+# 		-Dpybind11_DIR=$(PYBIND11_DIR)
+# 	cmake --build $(BUILD_DIR) -- -j$$(nproc)
+# 	cd $(BUILD_DIR) && ctest || true
+# 	# Generate HTML report with gcovr (requires gcovr installed: pip install gcovr)
+# 	gcovr -r . --html --html-details -o coverage.html
+# 	@echo "Coverage report generated: $(BUILD_DIR)/coverage.html"
+
 
 clean:
 	@rm -rf $(BUILD_DIR)

@@ -34,16 +34,15 @@ jobs:
         run: pip install poetry
 
       - name: Install dependencies
-        run: poetry install --with dev --no-interaction --no-root
-
-      - name: Install package in editable mode
-        run: poetry run pip install -e .
+        run: |
+          poetry install --with dev --no-interaction
+          pip install pybind11
 
       # --- Build C++ extension with coverage flags ---
       - name: Build C++ extensions
         run: |
           poetry run make clean
-          poetry run build-wrapper-linux-x86-64 --out-dir build_wrapper_output make cov
+          poetry run make all
 
       - name: Build package
         run: poetry build
@@ -51,35 +50,35 @@ jobs:
       # --- Run tests (Python + C++) ---
       - name: Run pytest with coverage
         run: |
-          poetry run pytest --cov=mypackage --cov-report=xml --cov-report=term-missing
+          poetry run pytest --cov=monolith --cov-report=xml --cov-report=term-missing
 
-      - name: Generate lcov report
-        run: |
-          # Capture coverage from build dir
-          lcov --capture --directory cpp/obj/src --output-file coverage.info
-          # Filter out system files
-          lcov --remove coverage.info
-          # Generate HTML report
-          genhtml coverage.info --output-directory cpp_coverage
+      # - name: Generate lcov report
+      #   run: |
+      #     # Capture coverage from build dir
+      #     lcov --capture --directory cpp/obj/src --output-file coverage.info
+      #     # Filter out system files
+      #     lcov --remove coverage.info
+      #     # Generate HTML report
+      #     genhtml coverage.info --output-directory cpp_coverage
 
-      # --- Upload artifacts ---
-      - name: Upload Python coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-coverage
-          path: coverage.xml
+      # # --- Upload artifacts ---
+      # - name: Upload Python coverage report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: python-coverage
+      #     path: coverage.xml
 
-      - name: Upload C++ coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: cpp-coverage
-          path: cpp_coverage
+      # - name: Upload C++ coverage report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: cpp-coverage
+      #     path: cpp_coverage
 
-      - name: Upload C++ coverage data
-        uses: actions/upload-artifact@v4
-        with:
-          name: cpp-coverage-data
-          path: coverage.info
+      # - name: Upload C++ coverage data
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: cpp-coverage-data
+      #     path: coverage.info
 
       # --- SonarCloud Analysis ---
       # - name: SonarCloud Scan

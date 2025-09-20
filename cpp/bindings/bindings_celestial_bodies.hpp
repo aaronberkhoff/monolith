@@ -22,6 +22,9 @@ inline void bind_celestial_bodies(py::module_ &m) {
             double,
             double,
             double,
+            double,
+            double,
+            double,
             int
         >(),
         py::arg("name"),
@@ -29,6 +32,9 @@ inline void bind_celestial_bodies(py::module_ &m) {
         py::arg("radius"),
         py::arg("j2"),
         py::arg("j3"),
+        py::arg("j4"),
+        py::arg("j5"),
+        py::arg("j6"),
         py::arg("spice_id"))
 
         // fields
@@ -37,6 +43,9 @@ inline void bind_celestial_bodies(py::module_ &m) {
         .def_readwrite("radius", &CelestialBody::radius)
         .def_readwrite("j2", &CelestialBody::j2)
         .def_readwrite("j3", &CelestialBody::j3)
+        .def_readwrite("j4", &CelestialBody::j4)
+        .def_readwrite("j5", &CelestialBody::j5)
+        .def_readwrite("j6", &CelestialBody::j6)
         .def_readwrite("spice_id", &CelestialBody::spice_id);
 
     // Derived classes

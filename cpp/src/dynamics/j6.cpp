@@ -10,16 +10,27 @@ namespace monolith {
     // compute common terms
     double r = state.position.norm();
     double r2     = r * r;
-    double r5     = r2 * r2 * r;
+    double r4     = r2 * r2;
+    double r6     = r4 * r2;
+    double r9     = r6 * r2 * r;
 
-    double alpha = -3 * central_body.j2 * central_body.mu * central_body.radius * central_body.radius;
-    double beta = 1 - 5 * state.position[2] * state.position[2] / r2;
-    double gamma = 2 * r5;
+    double rx     = state.position[0];
+    double ry     = state.position[1];
+    double rz     = state.position[2];
+
+    double rz2    = rz * rz;
+    double rz4    = rz2 * rz2;
+    double rz6    = rz4 * rz2;
+
+    double R6     = std::pow(central_body.radius,6);
+
+    double alpha  = -central_body.j6 * central_body.mu *R6 / (16*r9);
+    double beta   = (35 - 945 * rz2 / r2 + 3465 * rz4 / r4 - 3003 * rz6 / r6) ;
 
     //  Compute accelerations using Vallado's formulation -> missing a factor of -1.5?
-    double ax = alpha * state.position[0] / gamma * beta;
-    double ay = alpha * state.position[1] / gamma * beta;
-    double az = alpha * state.position[2] / gamma * (3 - 5 * state.position[2]*state.position[2] / r2);
+    double ax = alpha * rx * beta;
+    double ay = alpha * ry * beta;
+    double az = alpha * rz * (245 - 2205 * rz2 / r2 + 4851 * rz4 / r4 - 3003 * rz6 / r6);
 
     new_state.acceleration = Eigen::Vector3d(ax,ay,az);
 
