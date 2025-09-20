@@ -1,13 +1,12 @@
 #pragma once
 #include <Eigen/Dense>
 
+namespace monolith {
 class State {
 public:
     Eigen::Vector3d position = Eigen::Vector3d::Zero();
     Eigen::Vector3d velocity = Eigen::Vector3d::Zero();
     Eigen::Vector3d acceleration = Eigen::Vector3d::Zero();
-
-    // virtual ~State() = default;
 
     // this is how you can do default arguments
     State()
@@ -40,20 +39,4 @@ public:
     }
 };
 
-
-class Dynamic {
-public:
-    // Virtual destructor (important for inheritance!)
-    virtual ~Dynamic() = default;
-
-    // Abstract function that will do calculations
-    virtual State operator()(const State& state) const = 0;
-
-};
-
-class TwoBody : public Dynamic {
-public:
-    explicit TwoBody(double mu_) : mu(mu_) {} // Initializer
-    State operator()(const State& state) const override; // base function
-    double mu;
-};
+}

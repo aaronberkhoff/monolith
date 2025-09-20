@@ -3,7 +3,7 @@ name: Build & Publish Package
 on:
   # Build on branch pushes and PRs
   push:
-    branches: [dev]
+    branches: ['*']
   pull_request:
     branches: [dev]
   # Publish on version tag push (e.g., v1.0.0)
@@ -36,8 +36,10 @@ jobs:
       - name: Install Python dependencies
         run: poetry install --no-interaction --no-root
 
-      - name: Install package in editable mode
-        run: poetry run pip install -e .
+      - name: Install dependencies
+        run: |
+          poetry install --with dev --no-interaction
+          pip install pybind11
 
       - name: Build C++ extensions
         run: |
