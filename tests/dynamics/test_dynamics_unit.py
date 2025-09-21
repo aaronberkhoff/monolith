@@ -166,11 +166,11 @@ def test_j3_operator(mock_scenario: MockScenario):
 def test_j4_operator(mock_scenario: MockScenario):
 
     #state operation
-    new_state = mock_scenario.j3(mock_scenario.state)
+    new_state = mock_scenario.j4(mock_scenario.state)
     assert isinstance(new_state, State)
 
     #expected behavior for two body
-    expected_acceleration = mock_scenario.oracle.get_j3_acceleration()
+    expected_acceleration = mock_scenario.oracle.get_j4_acceleration()
 
     assert np.allclose(mock_scenario.state.position,new_state.position) # position is unchanged
     assert np.allclose(mock_scenario.state.velocity,new_state.velocity) # velocity is unchanged
@@ -179,11 +179,11 @@ def test_j4_operator(mock_scenario: MockScenario):
 def test_j5_operator(mock_scenario: MockScenario):
 
     #state operation
-    new_state = mock_scenario.j3(mock_scenario.state)
+    new_state = mock_scenario.j5(mock_scenario.state)
     assert isinstance(new_state, State)
 
     #expected behavior for two body
-    expected_acceleration = mock_scenario.oracle.get_j3_acceleration()
+    expected_acceleration = mock_scenario.oracle.get_j5_acceleration()
 
     assert np.allclose(mock_scenario.state.position,new_state.position) # position is unchanged
     assert np.allclose(mock_scenario.state.velocity,new_state.velocity) # velocity is unchanged
@@ -192,11 +192,11 @@ def test_j5_operator(mock_scenario: MockScenario):
 def test_j6_operator(mock_scenario: MockScenario):
 
     #state operation
-    new_state = mock_scenario.j3(mock_scenario.state)
+    new_state = mock_scenario.j6(mock_scenario.state)
     assert isinstance(new_state, State)
 
     #expected behavior for two body
-    expected_acceleration = mock_scenario.oracle.get_j3_acceleration()
+    expected_acceleration = mock_scenario.oracle.get_j6_acceleration()
 
     assert np.allclose(mock_scenario.state.position,new_state.position) # position is unchanged
     assert np.allclose(mock_scenario.state.velocity,new_state.velocity) # velocity is unchanged
