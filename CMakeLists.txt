@@ -28,49 +28,63 @@ find_package(pybind11 CONFIG REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 
-# ---------------- Includes ----------------
-include_directories(${CMAKE_SOURCE_DIR}/cpp/include)
+# ---------------- CSPICE ----------------
+set(CSPICE_ROOT "${CMAKE_SOURCE_DIR}/third_party/cspice")
+set(CSPICE_LIBS
+    ${CSPICE_ROOT}/lib/cspice.a
+    ${CSPICE_ROOT}/lib/csupport.a
+)
+include_directories(${CSPICE_ROOT}/include)
 
-# Python package folder
+# ---------------- Core C++ Library ----------------
+file(GLOB_RECURSE CORE_SOURCES CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/cpp/src/*.cpp
+)
+
+add_library(monolith SHARED ${CORE_SOURCES})
+target_include_directories(monolith PUBLIC
+    ${CMAKE_SOURCE_DIR}/cpp/include
+    ${CSPICE_ROOT}/include
+)
+target_link_libraries(monolith PUBLIC Eigen3::Eigen ${CSPICE_LIBS})
+
 set(PY_FOLDER ${CMAKE_SOURCE_DIR}/python/monolith)
-
-# ---------------- Dynamic Modules ----------------
-# List of actual pybind11 targets we build
 set(MODULE_TARGETS "")
 
-# Loop through each subdirectory under cpp/src/
+# Loop over subdirectories in cpp/src/
 file(GLOB children RELATIVE ${CMAKE_SOURCE_DIR}/cpp/src ${CMAKE_SOURCE_DIR}/cpp/src/*)
 
 foreach(child ${children})
     if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/cpp/src/${child})
-        message(STATUS "Checking for pybind11 module in: ${child}")
 
-        # Collect all .cpp files in that subdirectory
-        file(GLOB_RECURSE MODULE_SOURCES CONFIGURE_DEPENDS
-            ${CMAKE_SOURCE_DIR}/cpp/src/${child}/*.cpp
-        )
-
-        # Add matching binding file if it exists, otherwise warn
-        set(BINDING_FILE ${CMAKE_SOURCE_DIR}/cpp/bindings/bindings_${child}.cpp)
-        if(EXISTS ${BINDING_FILE})
-            list(APPEND MODULE_SOURCES ${BINDING_FILE})
-        else()
-            message(WARNING "No binding file found for module '${child}' (expected: bindings_${child}.cpp)")
+        # Skip if it’s a bindings folder
+        if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/cpp/bindings/${child})
+            message(STATUS "Skipping binding directory: ${child}")
+            continue()
         endif()
 
-        # If directory has sources, make a pybind11 module
-        if(MODULE_SOURCES)
-            message(STATUS " -> Adding pybind11 module: ${child}")
-            pybind11_add_module(${child} ${MODULE_SOURCES})
-            target_include_directories(${child} PRIVATE ${CMAKE_SOURCE_DIR}/cpp/include)
-            target_link_libraries(${child} PRIVATE Eigen3::Eigen)
+        # Only include the binding file for the module; implementation code will be compiled into the .so
+        set(BINDING_FILE ${CMAKE_SOURCE_DIR}/cpp/bindings/bindings_${child}.cpp)
+        if(EXISTS ${BINDING_FILE})
+            pybind11_add_module(${child} ${BINDING_FILE})
+
+            target_include_directories(${child} PRIVATE
+                ${CMAKE_SOURCE_DIR}/cpp/include
+                ${CSPICE_ROOT}/include
+            )
+
+            target_link_libraries(${child} PRIVATE Eigen3::Eigen ${CSPICE_LIBS} monolith)
+
+
             set_target_properties(${child} PROPERTIES
                 OUTPUT_NAME "${child}"
                 LIBRARY_OUTPUT_DIRECTORY ${PY_FOLDER}
             )
 
-            # Save to the list of real targets
             list(APPEND MODULE_TARGETS ${child})
+            message(STATUS " -> Added Python module: ${child}")
+        else()
+            message(WARNING "No binding file found for module '${child}' (expected: bindings_${child}.cpp)")
         endif()
     endif()
 endforeach()
@@ -81,6 +95,5 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/python/monolith
         DESTINATION .
         FILES_MATCHING PATTERN "*.py")
 
-# Only install the modules that were actually built
 install(TARGETS ${MODULE_TARGETS}
         LIBRARY DESTINATION monolith)

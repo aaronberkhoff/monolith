@@ -1,14 +1,17 @@
 import numpy as np
 
+from typing import Sequence
+
 from monolith.dynamics import State
 from monolith.celestial_bodies import CelestialBody
 
 class DynamicsOracle:
 
-    def __init__(self,state: State, planet: CelestialBody):
+    def __init__(self,state: State, planet: CelestialBody, bodies: Sequence[CelestialBody]):
 
         self.state = state
         self.planet = planet
+        self.bodies = bodies
 
     def get_two_body_acceleration(self):
 
@@ -146,3 +149,43 @@ class DynamicsOracle:
         az = -J6 * mu *R**6 *rz / (16*r**9) * (245 - 2205 * rz**2 / r**2 + 4851 * rz**4 / r**4 - 3003 * rz**6 / r**6)
 
         return np.array([ax,ay,az])
+
+    def get_nbody_acceleration(self):
+
+        def single_body(body: CelestialBody):
+
+            mu = body.mu
+
+            # Get ephemeris time
+            # current_time = state.time
+            # et = spice.str2et(current_time.strftime('%Y-%m-%dT%H:%M:%S'))
+
+            # Get the position and velocity of the third body relative to inertial body
+            third_body_state: State
+            third_body_state = body.get_state(self.state.time, self.planet)
+
+            # Extract the position (first 3 elements of the self.state vector)
+            inertial_to_third_body = (
+                third_body_state.position
+            )  # 3rd body position in km (X, Y, Z)
+
+            # Agent position relative to inertial body
+            inertial_to_agent = self.state.position  # Agent position in km (X, Y, Z)
+
+            # Agent position relative to third body
+            agent_to_third_body = inertial_to_third_body - inertial_to_agent
+
+            # Third body acceleration
+            accel_third_body = mu * (
+                agent_to_third_body / (np.linalg.norm(agent_to_third_body) ** 3)
+                - inertial_to_third_body / (np.linalg.norm(inertial_to_third_body) ** 3)
+            )
+
+            return accel_third_body
+
+        accel = np.zeros(3)
+
+        for body in self.bodies:
+            accel += single_body(body)
+
+        return accel

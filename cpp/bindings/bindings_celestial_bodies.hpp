@@ -2,6 +2,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "monolith/celestial_bodies/celestial_bodies.hpp"
+#include "monolith/time/time.hpp"
+
 
 namespace py = pybind11;
 
@@ -37,6 +39,9 @@ inline void bind_celestial_bodies(py::module_ &m) {
         py::arg("j6"),
         py::arg("spice_id"))
 
+       .def("get_state", &CelestialBody::get_state,
+           py::arg("time"),
+           py::arg("central_body"))
         // fields
         .def_readwrite("name", &CelestialBody::name)
         .def_readwrite("mu", &CelestialBody::mu)

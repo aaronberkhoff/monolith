@@ -1,42 +1,54 @@
 #pragma once
 #include <Eigen/Dense>
+#include "monolith/time/time.hpp"
+#include "monolith/utils/transforms.hpp"
 
 namespace monolith {
-class State {
-public:
-    Eigen::Vector3d position = Eigen::Vector3d::Zero();
-    Eigen::Vector3d velocity = Eigen::Vector3d::Zero();
-    Eigen::Vector3d acceleration = Eigen::Vector3d::Zero();
 
-    // this is how you can do default arguments
-    State()
-        : position(Eigen::Vector3d::Zero()),
-          velocity(Eigen::Vector3d::Zero()),
-          acceleration(Eigen::Vector3d::Zero()) {}
+    class State {
+        public:
+            Eigen::Vector3d position;
+            Eigen::Vector3d velocity;
+            Eigen::Vector3d acceleration;
+            TimeParameter time;
 
-    State(const Eigen::Vector3d& pos = Eigen::Vector3d::Zero(),
-          const Eigen::Vector3d& vel = Eigen::Vector3d::Zero(),
-          const Eigen::Vector3d& acc = Eigen::Vector3d::Zero())
-        : position(pos), velocity(vel), acceleration(acc) {}
+            // Single constructor with defaults
+            State(const Eigen::Vector3d& position_     = Eigen::Vector3d::Zero(),
+                const Eigen::Vector3d& velocity_     = Eigen::Vector3d::Zero(),
+                const Eigen::Vector3d& acceleration_ = Eigen::Vector3d::Zero(),
+                const TimeParameter& time_           = TimeParameter())
+                : position(position_), velocity(velocity_), acceleration(acceleration_), time(time_) {}
+
+            // Example operator (unusual use of >>)
+            State operator>>(const State& other) const {
+                Eigen::Vector3d accel = this->acceleration + other.acceleration;
+                return State(this->position, this->velocity, accel, this->time);
+            }
+    };
+
+    class OrbitalElements {
+
+        public:
+            double sma;
+            double ecc;
+            double inc;
+            double raan;
+            double arg;
+            double nu;
+
+        OrbitalElements(const double sma_ = 7000.0, const double ecc_ = 0.0, const double inc_ = 0.0,
+                        const double raan_ = 0.0,   const double arg_ = 0.0, const double nu_ = 0.0)
+                        : sma(sma_), ecc(ecc_), inc(inc_), raan(raan_), arg(arg_), nu(nu_) {}
+
+        State get_state(double mu) const {
+            Eigen::VectorXd rv = oe2rv(sma, ecc, inc, raan, arg, nu, mu);
+            Eigen::Vector3d r = rv.head<3>();      // first 3 elements
+            Eigen::Vector3d v = rv.tail<3>();      // last 3 elements
+
+            return State(r, v);
+        }
 
 
-    // setters
-    void set_position(const Eigen::Vector3d& pos);
-    void set_velocity(const Eigen::Vector3d& vel);
-    void set_acceleration(const Eigen::Vector3d& acc);
+    };
 
-    // getters
-    Eigen::Vector3d get_position() const;
-    Eigen::Vector3d get_velocity() const;
-    Eigen::Vector3d get_acceleration() const;
-
-    // Overload @ operator
-    State operator>>(const State& other) const {
-        Eigen::Vector3d accel = this->acceleration + other.acceleration;
-
-        // Return new State with same position & velocity, but new acceleration
-        return State(this->position, this->velocity, accel);
-    }
-};
-
-}
+} // namespace monolith

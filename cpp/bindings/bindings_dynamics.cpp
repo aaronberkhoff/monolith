@@ -9,5 +9,7 @@ PYBIND11_MODULE(dynamics, m) {
     // Import Planet class from monolith.planets to help stubgen
     py::module_ celestial_bodies = py::module_::import("monolith.celestial_bodies");
     m.attr("CelestialBody") = celestial_bodies.attr("CelestialBody");
+    py::module_ time = py::module_::import("monolith.time");
+    m.attr("TimeParameter") = time.attr("TimeParameter");
 
 }
