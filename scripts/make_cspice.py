@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import os
 import sys
 import platform
@@ -82,9 +83,20 @@ def download_kernels():
 
     print(f"All SPICE kernels are ready in {DATA_DIR}")
 
-def main():
+def main(argv):
+
     download_cspice()
-    download_kernels()
+    if argv.kernels:
+        download_kernels()
+
+def cli(argv=None):
+
+    """Parse CLI arguments and return them."""
+    parser = ArgumentParser(description="Process a kernel command.")
+    parser.add_argument("-k", "--kernels", action="store_true",
+                        help="Enable verbose logging")
+
+    return parser.parse_args(argv)
 
 if __name__ == "__main__":
-    main()
+    main(cli(sys.argv[1:]))

@@ -8,6 +8,10 @@ __pycache__/
 bin/
 temp/
 .sonarlint
+third_party/
+data/
+
+
 
 # C extensions
 *.so

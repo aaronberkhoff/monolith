@@ -38,14 +38,14 @@ jobs:
           poetry install --with dev --no-interaction
           pip install pybind11
 
+      - name: Install Spice
+        run: poetry run make spice
+
       # --- Build C++ extension with coverage flags ---
       - name: Build C++ extensions
         run: |
           poetry run make clean
           poetry run make all
-
-      - name: Build package
-        run: poetry build
 
       # --- Run tests (Python + C++) ---
       - name: Run pytest with coverage

@@ -8,7 +8,6 @@ from typing import Optional, Sequence
 import numpy as np
 import pytest
 
-
 from monolith.dynamics import State, TwoBody, J2, J3, J4, J5, J6, NBody, OrbitalElements
 from monolith.celestial_bodies import Earth, Moon, CelestialBody
 from monolith.time import TimeParameter

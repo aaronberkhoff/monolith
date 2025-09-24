@@ -94,7 +94,10 @@ CPP_FOLDER = $(MonoHome)/cpp
 
 BUILD_DIR := build
 
-.PHONY: all clean stubs stubs_clean cov
+.PHONY: all clean stubs stubs_clean cov spice
+
+spice:
+	python scripts/make_cspice.py --kernels
 
 all:
 	@mkdir -p $(BUILD_DIR)

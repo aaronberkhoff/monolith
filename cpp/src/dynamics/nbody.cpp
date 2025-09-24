@@ -14,7 +14,6 @@ namespace monolith {
 
         return acceleration;
 
-
     };
 
     State NBody::operator()(const State& state) const {
